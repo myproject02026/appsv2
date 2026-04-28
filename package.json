@@ -1,8 +1,8 @@
 {
-  "name": "vercel-xhttp-relay",
+  "name": "myusproj1",
   "version": "1.1.0",
   "type": "module",
-  "description": "Serverless XHTTP relay for Xray/V2Ray on Vercel (Node.js runtime, 128MB memory)",
+  "description": "myusproj1",
   "private": true,
   "license": "MIT"
 }
