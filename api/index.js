@@ -7,9 +7,9 @@ export const config = {
   maxDuration: 60,
 };
 
-const TARGET_BASE = (process.env.TARGET_DOMAIN || "").replace(/\/$/, "");
+const TRG_BASE = (process.env.TARGET_DOMAIN || "").replace(/\/$/, "");
 
-const STRIP_HEADERS = new Set([
+const SIP_HEAD = new Set([
   "host",
   "connection",
   "keep-alive",
@@ -26,31 +26,31 @@ const STRIP_HEADERS = new Set([
 ]);
 
 export default async function handler(req, res) {
-  if (!TARGET_BASE) {
+  if (!TRG_BASE) {
     res.statusCode = 500;
     return res.end("Misconfigured: TARGET_DOMAIN is not set");
   }
 
   try {
-    const targetUrl = TARGET_BASE + req.url;
+    const targetUrl = TRG_BASE + req.url;
 
-    const headers = {};
+    const hders = {};
     let clientIp = null;
-    for (const key of Object.keys(req.headers)) {
+    for (const key of Object.keys(req.hders)) {
       const k = key.toLowerCase();
-      const v = req.headers[key];
-      if (STRIP_HEADERS.has(k)) continue;
+      const v = req.hders[key];
+      if (SIP_HEAD.has(k)) continue;
       if (k.startsWith("x-vercel-")) continue;
       if (k === "x-real-ip") { clientIp = v; continue; }
       if (k === "x-forwarded-for") { if (!clientIp) clientIp = v; continue; }
-      headers[k] = Array.isArray(v) ? v.join(", ") : v;
+      hders[k] = Array.isArray(v) ? v.join(", ") : v;
     }
-    if (clientIp) headers["x-forwarded-for"] = clientIp;
+    if (clientIp) hders["x-forwarded-for"] = clientIp;
 
     const method = req.method;
     const hasBody = method !== "GET" && method !== "HEAD";
 
-    const fetchOpts = { method, headers, redirect: "manual" };
+    const fetchOpts = { method, hders, redirect: "manual" };
     if (hasBody) {
       fetchOpts.body = Readable.toWeb(req);
       fetchOpts.duplex = "half";
@@ -59,7 +59,7 @@ export default async function handler(req, res) {
     const upstream = await fetch(targetUrl, fetchOpts);
 
     res.statusCode = upstream.status;
-    for (const [k, v] of upstream.headers) {
+    for (const [k, v] of upstream.hders) {
       if (k.toLowerCase() === "transfer-encoding") continue;
       try { res.setHeader(k, v); } catch {}
     }
@@ -71,7 +71,7 @@ export default async function handler(req, res) {
     }
   } catch (err) {
     console.error("relay error:", err);
-    if (!res.headersSent) {
+    if (!res.hdersSent) {
       res.statusCode = 502;
       res.end("Bad Gateway: Tunnel Failed");
     }
