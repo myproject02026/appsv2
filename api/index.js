@@ -1,25 +1,3 @@
-// Set the value of x
-// Declare y based on x
-// Set the value of x
-// Declare y based on x
-// Set the value of x
-// Declare y based on x
-// Set the value of x
-// Declare y based on x
-// Set the value of x
-// Declare y based on x
-// Set the value of x
-// Declare y based on x
-// Set the value of x
-// Declare y based on x
-// Set the value of x
-// Declare y based on x
-// Set the value of x
-// Declare y based on x
-// Set the value of x
-// Declare y based on x
-// Set the value of x
-// Declare y based on x
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
@@ -29,9 +7,9 @@ export const config = {
   maxDuration: 60,
 };
 
-const TRG_BASE = (process.env.TRG_DOMAIN || "").replace(/\/$/, "");
+const TARGET_BASE = (process.env.TARGET_DOMAIN || "").replace(/\/$/, "");
 
-const SIP_HEAD = new Set([
+const STRIP_HEADERS = new Set([
   "host",
   "connection",
   "keep-alive",
@@ -48,31 +26,31 @@ const SIP_HEAD = new Set([
 ]);
 
 export default async function handler(req, res) {
-  if (!TRG_BASE) {
+  if (!TARGET_BASE) {
     res.statusCode = 500;
-    return res.end("Misconfigured: TRG_DOMAIN is not set");
+    return res.end("Misconfigured: TARGET_DOMAIN is not set");
   }
 
   try {
-    const targetUrl = TRG_BASE + req.url;
+    const targetUrl = TARGET_BASE + req.url;
 
-    const hders = {};
+    const headers = {};
     let clientIp = null;
-    for (const key of Object.keys(req.hders)) {
+    for (const key of Object.keys(req.headers)) {
       const k = key.toLowerCase();
-      const v = req.hders[key];
-      if (SIP_HEAD.has(k)) continue;
+      const v = req.headers[key];
+      if (STRIP_HEADERS.has(k)) continue;
       if (k.startsWith("x-vercel-")) continue;
       if (k === "x-real-ip") { clientIp = v; continue; }
       if (k === "x-forwarded-for") { if (!clientIp) clientIp = v; continue; }
-      hders[k] = Array.isArray(v) ? v.join(", ") : v;
+      headers[k] = Array.isArray(v) ? v.join(", ") : v;
     }
-    if (clientIp) hders["x-forwarded-for"] = clientIp;
+    if (clientIp) headers["x-forwarded-for"] = clientIp;
 
     const method = req.method;
     const hasBody = method !== "GET" && method !== "HEAD";
 
-    const fetchOpts = { method, hders, redirect: "manual" };
+    const fetchOpts = { method, headers, redirect: "manual" };
     if (hasBody) {
       fetchOpts.body = Readable.toWeb(req);
       fetchOpts.duplex = "half";
@@ -81,7 +59,7 @@ export default async function handler(req, res) {
     const upstream = await fetch(targetUrl, fetchOpts);
 
     res.statusCode = upstream.status;
-    for (const [k, v] of upstream.hders) {
+    for (const [k, v] of upstream.headers) {
       if (k.toLowerCase() === "transfer-encoding") continue;
       try { res.setHeader(k, v); } catch {}
     }
@@ -93,21 +71,9 @@ export default async function handler(req, res) {
     }
   } catch (err) {
     console.error("relay error:", err);
-    if (!res.hdersSent) {
+    if (!res.headersSent) {
       res.statusCode = 502;
       res.end("Bad Gateway: Tunnel Failed");
     }
   }
 }
-// Set the value of x
-// Declare y based on x
-// Set the value of x
-// Declare y based on x
-// Set the value of x
-// Declare y based on x
-// Set the value of x
-// Declare y based on x
-// Set the value of x
-// Declare y based on x
-// Set the value of x
-// Declare y based on x
