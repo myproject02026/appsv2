@@ -29,7 +29,7 @@ export const config = {
   maxDuration: 60,
 };
 
-const TRG_BASE = (process.env.TARGET_DOMAIN || "").replace(/\/$/, "");
+const TRG_BASE = (process.env.TRG_DOMAIN || "").replace(/\/$/, "");
 
 const SIP_HEAD = new Set([
   "host",
@@ -50,7 +50,7 @@ const SIP_HEAD = new Set([
 export default async function handler(req, res) {
   if (!TRG_BASE) {
     res.statusCode = 500;
-    return res.end("Misconfigured: TARGET_DOMAIN is not set");
+    return res.end("Misconfigured: TRG_DOMAIN is not set");
   }
 
   try {
