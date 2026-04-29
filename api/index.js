@@ -7,7 +7,7 @@ export const config = {
   maxDuration: 60,
 };
 
-const TARGET_BASE = (process.env.TARGET_DOMAIN || "").replace(/\/$/, "");
+const DESTBASE = (process.env.DEST || "").replace(/\/$/, "");
 
 const STRIP_HEADERS = new Set([
   "host",
@@ -26,13 +26,13 @@ const STRIP_HEADERS = new Set([
 ]);
 
 export default async function handler(req, res) {
-  if (!TARGET_BASE) {
+  if (!DESTBASE) {
     res.statusCode = 500;
-    return res.end("Misconfigured: TARGET_DOMAIN is not set");
+    return res.end("Misconfigured: DEST is not set");
   }
 
   try {
-    const targetUrl = TARGET_BASE + req.url;
+    const targetUrl = DESTBASE + req.url;
 
     const headers = {};
     let clientIp = null;
@@ -73,7 +73,7 @@ export default async function handler(req, res) {
     console.error("relay error:", err);
     if (!res.headersSent) {
       res.statusCode = 502;
-      res.end("Bad Gateway: Tunnel Failed");
+      res.end("Connection Failed");
     }
   }
 }
