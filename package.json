@@ -1,8 +1,8 @@
 {
-  "name": "myusprojvx1",
+  "name": "project0x1",
   "version": "1.1.0",
   "type": "module",
-  "description": "myusprojvx1",
+  "description": "project0x1",
   "private": true,
-  "license": "MIT"
+  "license": "MyProService"
 }
