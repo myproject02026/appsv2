@@ -1,8 +1,8 @@
 {
-  "name": "project_s1",
-  "version": "1.1.0",
+  "name": "project_s2",
+  "version": "2.2.0",
   "type": "module",
-  "description": "project_s1",
+  "description": "project_s2",
   "private": true,
-  "license": "MyProService0x0x002121"
+  "license": "MyProService1x1x002121"
 }
