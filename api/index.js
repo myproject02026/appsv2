@@ -9,7 +9,7 @@ export const config = {
 
 const DESTBASE = (process.env.DEST || "").replace(/\/$/, "");
 
-const STRIP_HEADERS = new Set([
+const STRIPHEADERS = new Set([
   "host",
   "connection",
   "keep-alive",
@@ -28,18 +28,18 @@ const STRIP_HEADERS = new Set([
 export default async function handler(req, res) {
   if (!DESTBASE) {
     res.statusCode = 500;
-    return res.end("Misconfigured: DEST is not set");
+    return res.end("DEST is not set");
   }
 
   try {
-    const targetUrl = DESTBASE + req.url;
+    const target_Url = DESTBASE + req.url;
 
     const headers = {};
     let clientIp = null;
     for (const key of Object.keys(req.headers)) {
       const k = key.toLowerCase();
       const v = req.headers[key];
-      if (STRIP_HEADERS.has(k)) continue;
+      if (STRIPHEADERS.has(k)) continue;
       if (k.startsWith("x-vercel-")) continue;
       if (k === "x-real-ip") { clientIp = v; continue; }
       if (k === "x-forwarded-for") { if (!clientIp) clientIp = v; continue; }
