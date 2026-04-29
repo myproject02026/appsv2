@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "myusproj1",
+  "name": "myusprojvx1",
   "functions": {
     "api/index.js": {
       "memory": 128,
